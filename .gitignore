@@ -32,3 +32,5 @@ app
 # Debug files
 *.dSYM/
 *.su
+tmp/*
+*.bak
