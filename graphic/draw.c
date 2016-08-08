@@ -26,11 +26,24 @@ GtkWidget *image;
 #define CHESS_START_Y 20
 #define LINE_NUM ((WINDOW_Y - 2 * CHESS_START_Y) / LINE_SPACING + 1)
 #define ROW_NUM  ((WINDOW_X - 2 * CHESS_START_X) / ROW_SPACING + 1)
+#define IS_VALID(p) (p == 0 ? 0 : 1)
+
+typedef enum {
+	RIGHT      = 0x1,
+	DOWN       = 0x2,
+	RIGHT_DOWN = 0x4,
+	RIGHT_UP   = 0x8,
+}piece_direction;
 
 char chess_map[LINE_NUM][ROW_NUM] = {{0}, };
 char chess_black[LINE_NUM][ROW_NUM] = {{0}, };
 char chess_white[LINE_NUM][ROW_NUM] = {{0}, };
 
+int get_next_piece_direction(char (*p)[ROW_NUM])
+{
+
+	return 0;
+}
 /*
  * return : 1 : win, 0 : not win
  */
@@ -44,17 +57,47 @@ int is_win(int is_black)
 	else
 		p = chess_white;
 
+#if 0
+	printf("    ");
+	for (i = 0; i < ROW_NUM; i++)
+		printf("%3d", i);
+	printf("\n");
+
+	for (i = 0; i < LINE_NUM; i++) {
+		printf("%2d : ", i);
+		for (j = 0; j < ROW_NUM; j++) {
+			printf("%2d ", p[i][j]);
+		}
+		printf("\n");
+	}
+#endif
+
+	piece_direction direct;
+
 	for (i = 0; i < LINE_NUM; i++) {
 		for (j = 0; j < ROW_NUM; j++) {
 			if (p[i][j] != 0) {
-				if ((ROW_NUM - j >= 5) && (LINE_NUM - i >= 5)) {
-					if (p[i][j] && p[i + 1][j + 1] && p[i + 2][j + 2] && p[i + 3][j + 3] && p[i + 4][j + 4])
-						goto win;
-				} else if (ROW_NUM - j >= 5) {
+				if (ROW_NUM - j >= 5) {
+					direct |= RIGHT;
 					if (p[i][j] && p[i][j + 1] && p[i][j + 2] && p[i][j + 3] && p[i][j + 4])
 						goto win;
-				} else {
+				}
+
+				if (LINE_NUM - i >= 5) {
+					direct |= DOWN;
 					if (p[i][j] && p[i + 1][j] && p[i + 2][j] && p[i + 3][j] && p[i + 4][j])
+						goto win;
+				}
+
+				if (j >= 4 && (direct & RIGHT)) {
+					direct |= RIGHT_UP;
+					if (p[i][j] && p[i + 1][j - 1] && p[i + 2][j - 2] && p[i + 3][j - 3] && p[i + 4][j - 4])
+						goto win;
+				}
+
+				if ((direct & RIGHT) && (direct & DOWN)) {
+					direct |= RIGHT_DOWN;
+					if (p[i][j] && p[i + 1][j + 1] && p[i + 2][j + 2] && p[i + 3][j + 3] && p[i + 4][j + 4])
 						goto win;
 				}
 			}
@@ -204,6 +247,9 @@ static void draw_start(GtkWidget *draw,GdkEventButton *event,RECT_POINTER *rect)
 	} else
 		x = y = 0;
 
+	static GdkFont *font = NULL;
+	if (!font)
+		font = gdk_font_load ("-misc-fixed-medium-r-*-*-*-140-*-*-*-*-*-*");
 
 	printf("================ line %d row %d ===================\n", TO_LINE(y), TO_ROW(x));
 
@@ -212,12 +258,14 @@ static void draw_start(GtkWidget *draw,GdkEventButton *event,RECT_POINTER *rect)
 	chess_map[TO_LINE(y)][TO_ROW(x)] = 1;
 	if (is_black) {
 		chess_black[TO_LINE(y)][TO_ROW(x)] = 1;
-		if (is_win(1))
-			gdk_draw_text(draw->window, NULL, gc_red, 160, 160, black_win, strlen(black_win));
+		if (is_win(1)) {
+			gdk_draw_text(draw->window, font, gc_red, 80, 160, black_win, strlen(black_win));
+		}
 	} else {
 		chess_white[TO_LINE(y)][TO_ROW(x)] = 1;
-		if (is_win(0))
-			gdk_draw_text(draw->window, NULL, gc_red, 160, 160, white_win, strlen(white_win));
+		if (is_win(0)) {
+			gdk_draw_text(draw->window, font, gc_red, 80, 160, white_win, strlen(white_win));
+		}
 	}
 
 
