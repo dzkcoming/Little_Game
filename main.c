@@ -3,7 +3,6 @@
 
 int main(int argc, const char *argv[])
 {
-	test();
 #ifdef WUZIQI
 	wuziqi();
 #else
@@ -11,9 +10,4 @@ int main(int argc, const char *argv[])
 #endif
 
 	return 0;
-}
-
-void wuziqi(void)
-{
-
 }

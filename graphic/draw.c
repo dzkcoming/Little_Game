@@ -355,7 +355,7 @@ win:
 	return 1;
 }
 
-void test(void)
+void wuziqi(void)
 {
 	int argc = 0;
 	char **argv = NULL;
